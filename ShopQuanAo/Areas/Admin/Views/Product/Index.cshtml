@@ -65,9 +65,12 @@
                         {
                             <tr>
                                 <td>@i</td>
-                               
-                                <td> <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-productid="@item.ProductID">Insert</button></td>
-                                <td><img class="imgproduct" data-id="@item.ProductID" src="@item.ProductImages.FirstOrDefault(x=>x.isDefault).Image" width="60" /></td>
+                                <td>
+                                    <button type="button" class="btn" >
+                                        @*<img class="imgproduct" data-id="@item.ProductID" src="@item.ProductImages.FirstOrDefault(x=>x.isDefault).Image" width="60" />*@
+                                        <img class="imgproduct" data-id="@item.ProductID" src="@item.ListImages" width="60" />
+                                    </button>
+                                </td>
                                 <td>@item.ProductName</td>
                                 <td>@item.Title</td>
                                 <td>@item.Category.CatName</td>
@@ -113,41 +116,72 @@
 </div>
 
 
-<div id="exampleModal" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Thông tin khách hàng</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Tên:</label>
-                    @Html.Partial("../ProductImage/Index", new { id = "" })
+@*<td>
+    <button type="button" class="btn imgproduct" data-toggle="modal" data-target="#exampleModal" data-productid="@item.ProductID">
+        <img src="@item.ProductImages.FirstOrDefault(x=>x.isDefault).Image" width="60" />
+    </button>
+</td>*@
+@*<div id="exampleModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Hình ảnh sản phẩm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Tên:</label>
+                        @Html.Partial("../ProductImage/Index", new List<ShopQuanAo.Models.ProductImage>())
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-            </div>
         </div>
-    </div>
-</div>
+    </div>*@
+
+@*@section DoanJs{
+        <script>
+            $(document).ready(function () {
+                $('#exampleModal').on('show.bs.modal', function (event) {
+                    var button = $(event.relatedTarget);
+                    var productId = button.data('productid');
+                    var modal = $(this);
+                    modal.find('.modal-body').load('../ProductImage/Index?id=' + productId);
+                });
+            });
+        </script>
+    }*@
+
+
+
 
 @section DoanJs{
+
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script>
+
         $(document).ready(function () {
-            $('#exampleModal').on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget);
-                var productId = button.data('productid');
-                var modal = $(this);
-                modal.find('.modal-body').load('../ProductImage/Index?id=' + productId);
+            /* hien thi form upload anh*/
+            $("#dialog").dialog({
+                autoOpen: false,
+                show: "fade",
+                hide: "fade",
+                modal: true,
+                height: '500',
+                width: '600',
+                resizable: true,
+                title: 'Danh sách ảnh',
+                close: function () {
+                    window.location.reload();
+                }
+            });
+            $('body').on('click', '.imgproduct', function () {
+                var proid = $(this).attr("data-id");
+                $("#dialog #myIframe").attr("src", "/Admin/ProductImage/Index?id=" + proid);
+                $('#dialog').dialog('open');
+                return false;
             });
         });
     </script>
 }
-
-
-

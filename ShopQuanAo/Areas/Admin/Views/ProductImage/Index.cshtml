@@ -1,64 +1,94 @@
-﻿@model PagedList.PagedList<ShopQuanAo.Models.ProductImage>
+﻿@model IEnumerable<ShopQuanAo.Models.ProductImage>
 @{
-    Layout = null;
+    ViewBag.Title = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutEmty.cshtml";
 }
+
 
 <!DOCTYPE html>
 
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title> Ảnh sản phẩm </title>
+    <title>Index</title>
 </head>
 <body>
-    <div class="card-body">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>STT</th>
-                    <th>Hình ảnh</th>
-                  
-                    <th>Hiển thị</th>
-                    <th>#</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
-                {
-                    var i = ViewBag.Page;
-                    foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@i</td>
 
-                            <td>
-                                <img src="@item.Image" width="60" />
-                            </td>
-                            @*<td><img class="imgproduct" data-id="@item.ProductID" src="@item.Image.FirstOrDefault(x=>x.isDefault).Image" width="60" /></td>
-                           
-                            <td>@item.Status</td>*@
-                            <td>
-                                @Html.ActionLink("Sửa", "Edit", new { id = item.ProductID }, new { @class = "btn btn-sm btn-primary" })
-                                @Html.ActionLink("Xóa", "Delete", new { id = item.ProductID }, new { @class = "btn btn-sm btn-danger delete-link", onclick = "return confirm('Bạn có chắc muốn xóa?');" })
-                            </td>
-                        </tr>
-                        i++;
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="4">Không có bản ghi nào</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        <div class="row">
-            <div class="col-md-3"></div>
-            <div class="col-md-6 " style="text-align: center">  @Html.PagedListPager(Model, page => Url.Action("Index", new { page }))</div>
-            <div class="col-md-3"></div>
-        </div>
-
+    @ViewBag.Id
+    <div class="col-md-12">
+        <input type="button" class="btn btn-primary" id="iTaiAnh" onclick="BrowseServer();" value="Tải ảnh" />
     </div>
+    <table class="table">
+        <tr>
+            <th>
+                Hình ảnh
+            </th>
+            <th>
+                Mặc định
+            </th>
+
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr id="trow_@item.ImageID">
+                <td><img src="@item.Image" width="60" /></td>
+                <td>
+                    <input type="radio" name="isDefault" value="@item.isDefault" @(item.isDefault ? "checked" : "")>
+                </td>
+                <td><a href="#" data-id="@item.ImageID" class="btn btn-sm btn-danger btnDelete">Xóa</a></td>
+            </tr>
+        }
+
+    </table>
 </body>
 </html>
+
+@section DoanJs{
+    <script>
+        /*CkFinder*/
+        function BrowseServer(field) {
+            var finder = new CKFinder();
+            finder.selectActionFunction = function (fileUrl) {
+                AddImage(@ViewBag.ProductID, fileUrl);
+            };
+            finder.popup();
+        }
+
+        function AddImage(id, url) {
+            $.ajax({
+                url: "/Admin/ProductImage/AddImage",
+                type: 'POST',
+                data: { productID: id , url : url},
+                success: function (rs) {
+                    if (rs.success) {
+                        window.location.reload();
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('body').on('click', '.btnDelete', function () {
+                var id = $(this).data('id');
+                var conf = confirm("Bạn có muốn xóa ảnh này không?");
+                if (conf === true) {
+                    $.ajax({
+                        url: "/Admin/ProductImage/Delete",
+                        type: 'POST',
+                        data: { id: id },
+                        success: function (rs) {
+                            if (rs.success) {
+                                $('#trow_' + id).remove();
+                            }
+                        }
+                    });
+                };
+
+            });
+        });
+    </script>
+}
+
+
